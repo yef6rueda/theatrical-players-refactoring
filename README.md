@@ -1,3 +1,41 @@
+# Taller de Refactorización de Theatrical Players (Java)
+
+Este repositorio contiene la solución completa del Taller de Refactorización para la materia de **Reingeniería de Software** (8vo Semestre).
+
+## Backlog de Refactorización Completado
+
+Se siguió un flujo estructurado de micro-pasos seguros manteniendo el comportamiento externo validado por los tests de aprobación en cada paso:
+
+1. **Tarea 3.a (Junior) - Extracción de Créditos:** Extracción de la lógica de créditos por volumen a una función pura llamada `calculateVolumeCredits`.
+   * *Commit:* `refactor: extract volume credits calculation into calculateVolumeCredits`
+2. **Tarea 3.b (Junior) - Extracción de Montos:** Extracción del cálculo de monto para cada obra a una función independiente llamada `calculateAmount`.
+   * *Commit:* `refactor: extract performance amount calculation into calculateAmount`
+3. **Tarea 3.c (Intermediate) - Replace Temp with Query:** Eliminación de los acumuladores mutables (`totalAmount` y `volumeCredits`) del bucle principal reemplazándolos por métodos de consulta dedicados (`getTotalAmount` y `getTotalVolumeCredits`).
+   * *Commit:* `refactor: replace temp with query to eliminate mutable accumulators from loop`
+4. **Tarea 4 (Intermediate/Senior) - Split Phase:** División completa del programa en dos fases: generación de datos estructurados intermediarios (`StatementData` y `PerformanceData` records) y formateo de presentación (`renderPlainText`).
+   * *Commit:* `refactor: split phase into statement data generation and text formatting`
+5. **Tarea 5 (Senior) - Patrón Strategy / Polimorfismo:** Creación de la jerarquía polimórfica `PlayCalculator` con las subclases `TragedyCalculator` y `ComedyCalculator` para eliminar por completo la condicional `switch`.
+   * *Commit:* `refactor: rename PerformanceCalculator to PlayCalculator`
+6. **Tarea 5.1 (Nuevo Requisito) - HTML Statement:** Implementación del método `htmlStatement` consumiendo el token intermedio de la fase dividida (`StatementData`), junto con pruebas unitarias de validación en `StatementPrinterTests.java`.
+   * *Commit:* `feat: implement htmlStatement using intermediate StatementData`
+
+---
+
+## Ejecución de Pruebas
+
+Para validar el funcionamiento del proyecto de forma local utilizando el wrapper de Gradle:
+
+```bash
+cd java
+./gradlew test
+```
+
+Las pruebas de aprobación (`Approval Tests`) y unitarias se ejecutan de manera exitosa para ambos formatos (texto y HTML).
+
+---
+
+_Original kata description below:_
+
 _Support this and all my katas via [Patreon](https://www.patreon.com/EmilyBache)_
 
 Theatrical Players Refactoring Kata
