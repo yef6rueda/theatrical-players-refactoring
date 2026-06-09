@@ -16,15 +16,27 @@ public class StatementPrinter {
         List<PerformanceData> performances = new ArrayList<>();
         for (var perf : invoice.performances) {
             var play = plays.get(perf.playID);
+            var calculator = createPerformanceCalculator(perf, play);
             performances.add(new PerformanceData(
                 perf.playID,
                 play,
                 perf.audience,
-                calculateAmount(perf, play),
-                calculateVolumeCredits(perf, play)
+                calculator.amount(),
+                calculator.volumeCredits()
             ));
         }
         return new StatementData(invoice.customer, performances, getTotalAmount(performances), getTotalVolumeCredits(performances));
+    }
+
+    private PerformanceCalculator createPerformanceCalculator(Performance performance, Play play) {
+        switch (play.type) {
+            case "tragedy":
+                return new TragedyCalculator(performance, play);
+            case "comedy":
+                return new ComedyCalculator(performance, play);
+            default:
+                throw new Error("unknown type: %s".formatted(play.type));
+        }
     }
 
     private String renderPlainText(StatementData data) {
@@ -57,36 +69,61 @@ public class StatementPrinter {
         return result;
     }
 
-    private int calculateVolumeCredits(Performance perf, Play play) {
-        var result = 0;
-        result += Math.max(perf.audience - 30, 0);
-        if ("comedy".equals(play.type)) result += Math.floor(perf.audience / 5);
-        return result;
-    }
-
-    private int calculateAmount(Performance perf, Play play) {
-        var result = 0;
-        switch (play.type) {
-            case "tragedy":
-                result = 40000;
-                if (perf.audience > 30) {
-                    result += 1000 * (perf.audience - 30);
-                }
-                break;
-            case "comedy":
-                result = 30000;
-                if (perf.audience > 20) {
-                    result += 10000 + 500 * (perf.audience - 20);
-                }
-                result += 300 * perf.audience;
-                break;
-            default:
-                throw new Error("unknown type: %s".formatted(play.type));
-        }
-        return result;
-    }
-
 }
 
 record StatementData(String customer, List<PerformanceData> performances, int totalAmount, int totalVolumeCredits) {}
 record PerformanceData(String playID, Play play, int audience, int amount, int volumeCredits) {}
+
+class PerformanceCalculator {
+    protected final Performance performance;
+    protected final Play play;
+
+    public PerformanceCalculator(Performance performance, Play play) {
+        this.performance = performance;
+        this.play = play;
+    }
+
+    public int amount() {
+        throw new Error("subclass responsibility");
+    }
+
+    public int volumeCredits() {
+        return Math.max(performance.audience - 30, 0);
+    }
+}
+
+class TragedyCalculator extends PerformanceCalculator {
+    public TragedyCalculator(Performance performance, Play play) {
+        super(performance, play);
+    }
+
+    @Override
+    public int amount() {
+        int result = 40000;
+        if (performance.audience > 30) {
+            result += 1000 * (performance.audience - 30);
+        }
+        return result;
+    }
+}
+
+class ComedyCalculator extends PerformanceCalculator {
+    public ComedyCalculator(Performance performance, Play play) {
+        super(performance, play);
+    }
+
+    @Override
+    public int amount() {
+        int result = 30000;
+        if (performance.audience > 20) {
+            result += 10000 + 500 * (performance.audience - 20);
+        }
+        result += 300 * performance.audience;
+        return result;
+    }
+
+    @Override
+    public int volumeCredits() {
+        return super.volumeCredits() + (int) Math.floor(performance.audience / 5);
+    }
+}
