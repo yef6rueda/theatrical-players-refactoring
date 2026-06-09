@@ -36,7 +36,7 @@ public class StatementPrinter {
         List<PerformanceData> performances = new ArrayList<>();
         for (var perf : invoice.performances) {
             var play = plays.get(perf.playID);
-            var calculator = createPerformanceCalculator(perf, play);
+            var calculator = createPlayCalculator(perf, play);
             performances.add(new PerformanceData(
                 perf.playID,
                 play,
@@ -48,7 +48,7 @@ public class StatementPrinter {
         return new StatementData(invoice.customer, performances, getTotalAmount(performances), getTotalVolumeCredits(performances));
     }
 
-    private PerformanceCalculator createPerformanceCalculator(Performance performance, Play play) {
+    private PlayCalculator createPlayCalculator(Performance performance, Play play) {
         switch (play.type) {
             case "tragedy":
                 return new TragedyCalculator(performance, play);
@@ -94,11 +94,11 @@ public class StatementPrinter {
 record StatementData(String customer, List<PerformanceData> performances, int totalAmount, int totalVolumeCredits) {}
 record PerformanceData(String playID, Play play, int audience, int amount, int volumeCredits) {}
 
-class PerformanceCalculator {
+class PlayCalculator {
     protected final Performance performance;
     protected final Play play;
 
-    public PerformanceCalculator(Performance performance, Play play) {
+    public PlayCalculator(Performance performance, Play play) {
         this.performance = performance;
         this.play = play;
     }
@@ -112,7 +112,7 @@ class PerformanceCalculator {
     }
 }
 
-class TragedyCalculator extends PerformanceCalculator {
+class TragedyCalculator extends PlayCalculator {
     public TragedyCalculator(Performance performance, Play play) {
         super(performance, play);
     }
@@ -127,7 +127,7 @@ class TragedyCalculator extends PerformanceCalculator {
     }
 }
 
-class ComedyCalculator extends PerformanceCalculator {
+class ComedyCalculator extends PlayCalculator {
     public ComedyCalculator(Performance performance, Play play) {
         super(performance, play);
     }
