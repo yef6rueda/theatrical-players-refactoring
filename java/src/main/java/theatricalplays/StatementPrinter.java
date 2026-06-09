@@ -12,6 +12,26 @@ public class StatementPrinter {
         return renderPlainText(createStatementData(invoice, plays));
     }
 
+    public String htmlStatement(Invoice invoice, Map<String, Play> plays) {
+        return renderHtml(createStatementData(invoice, plays));
+    }
+
+    private String renderHtml(StatementData data) {
+        var result = String.format("<h1>Statement for %s</h1>%n", data.customer());
+        result += String.format("<table>%n");
+        result += String.format("<tr><th>play</th><th>seats</th><th>cost</th></tr>%n");
+
+        NumberFormat frmt = NumberFormat.getCurrencyInstance(Locale.US);
+
+        for (var perf : data.performances()) {
+            result += String.format("  <tr><td>%s</td><td>%s</td><td>%s</td></tr>%n", perf.play().name, perf.audience(), frmt.format(perf.amount() / 100));
+        }
+        result += String.format("</table>%n");
+        result += String.format("<p>Amount owed is <em>%s</em></p>%n", frmt.format(data.totalAmount() / 100));
+        result += String.format("<p>You earned <em>%s</em> credits</p>%n", data.totalVolumeCredits());
+        return result;
+    }
+
     public StatementData createStatementData(Invoice invoice, Map<String, Play> plays) {
         List<PerformanceData> performances = new ArrayList<>();
         for (var perf : invoice.performances) {
