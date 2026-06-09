@@ -7,8 +7,6 @@ import java.util.Map;
 public class StatementPrinter {
 
     public String print(Invoice invoice, Map<String, Play> plays) {
-        var totalAmount = 0;
-        var volumeCredits = 0;
         var result = String.format("Statement for %s%n", invoice.customer);
 
         NumberFormat frmt = NumberFormat.getCurrencyInstance(Locale.US);
@@ -17,15 +15,29 @@ public class StatementPrinter {
             var play = plays.get(perf.playID);
             var thisAmount = calculateAmount(perf, play);
 
-            // add volume credits
-            volumeCredits += calculateVolumeCredits(perf, play);
-
             // print line for this order
             result += String.format("  %s: %s (%s seats)%n", play.name, frmt.format(thisAmount / 100), perf.audience);
-            totalAmount += thisAmount;
         }
-        result += String.format("Amount owed is %s%n", frmt.format(totalAmount / 100));
-        result += String.format("You earned %s credits%n", volumeCredits);
+        result += String.format("Amount owed is %s%n", frmt.format(getTotalAmount(invoice, plays) / 100));
+        result += String.format("You earned %s credits%n", getTotalVolumeCredits(invoice, plays));
+        return result;
+    }
+
+    private int getTotalAmount(Invoice invoice, Map<String, Play> plays) {
+        var result = 0;
+        for (var perf : invoice.performances) {
+            var play = plays.get(perf.playID);
+            result += calculateAmount(perf, play);
+        }
+        return result;
+    }
+
+    private int getTotalVolumeCredits(Invoice invoice, Map<String, Play> plays) {
+        var result = 0;
+        for (var perf : invoice.performances) {
+            var play = plays.get(perf.playID);
+            result += calculateVolumeCredits(perf, play);
+        }
         return result;
     }
 
